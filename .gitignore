@@ -1,0 +1,36 @@
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Runtime and user data
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.log
+
+# Local-only infrastructure and source archives
+.private/
+*.zip
+
+# Python and test artifacts
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+node_modules/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store

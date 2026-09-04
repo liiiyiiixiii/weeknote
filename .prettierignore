@@ -1,0 +1,6 @@
+.private/
+backend/.venv/
+backend/data.db*
+backend/.env
+node_modules/
+htmlcov/

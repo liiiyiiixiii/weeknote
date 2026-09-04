@@ -1,0 +1,45 @@
+[Unit]
+Description=weeknote weekly report assistant
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=weeknote
+Group=weeknote
+WorkingDirectory=/opt/weeknote/backend
+EnvironmentFile=/etc/weeknote.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/weeknote/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2
+Restart=on-failure
+RestartSec=5s
+TimeoutStartSec=120s
+TimeoutStopSec=30s
+UMask=0077
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictRealtime=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/var/lib/weeknote
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=1G
+CPUQuota=150%
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target
