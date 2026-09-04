@@ -1,0 +1,16 @@
+{
+  "name": "weeknote-dev-tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Development-only formatting tools for the Weeknote static frontend.",
+  "scripts": {
+    "format": "prettier --write \"backend/static/**/*.{html,css,js}\" \".github/**/*.{yml,yaml}\"",
+    "format:check": "prettier --check \"backend/static/**/*.{html,css,js}\" \".github/**/*.{yml,yaml}\""
+  },
+  "devDependencies": {
+    "prettier": "3.9.6"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -1,0 +1,19 @@
+"""Conversation runtime-state persistence interface."""
+
+from app.persistence import runtime_backend
+
+Snapshot = runtime_backend.Snapshot
+namespace_epoch = runtime_backend.namespace_epoch
+assert_namespace_epoch = runtime_backend.assert_namespace_epoch
+load_conversation = runtime_backend.load_conversation
+save_conversation = runtime_backend.save_conversation
+delete_conversation = runtime_backend.delete_conversation
+clear_conversations = runtime_backend.clear_conversations
+cleanup_conversations = runtime_backend.cleanup_conversations
+load_custom_conversation = runtime_backend.load_custom_conversation
+save_custom_conversation = runtime_backend.save_custom_conversation
+delete_custom_conversation = runtime_backend.delete_custom_conversation
+clear_custom_conversations = runtime_backend.clear_custom_conversations
+bind_session_template = runtime_backend.bind_session_template
+clear_all_owner_runtime = runtime_backend.clear_all_owner_runtime
+delete_all_owner_data = runtime_backend.delete_all_owner_data

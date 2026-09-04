@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>周报助手</title>
+    <link rel="stylesheet" href="static/style.css?v=0.1.0" />
+  </head>
+  <body class="booting">
+    <div class="bg" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <button class="icon-btn" id="menu-btn" aria-label="打开菜单">
+        <svg
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+        >
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+      <div class="topbar-title">周报助手</div>
+      <div class="topbar-right" id="week-label"></div>
+    </header>
+
+    <div class="overlay" id="overlay"></div>
+    <aside class="drawer" id="drawer" aria-label="快捷菜单">
+      <div class="drawer-head">
+        <button
+          class="icon-btn drawer-back"
+          id="drawer-back"
+          type="button"
+          aria-label="返回快捷菜单"
+          hidden
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </button>
+        <span class="drawer-title" id="drawer-title">快捷菜单</span>
+        <button class="icon-btn" id="drawer-close" type="button" aria-label="关闭菜单">
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+          >
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-body">
+        <section class="drawer-view" id="drawer-main-view">
+          <div class="template-nav-section">
+            <div class="drawer-section-title"><span>内容模板</span></div>
+            <nav class="template-nav" id="template-nav" aria-label="内容模板">
+              <button
+                class="template-nav-item active"
+                id="weekly-template-btn"
+                type="button"
+                aria-current="page"
+              >
+                <span class="template-nav-icon">周</span
+                ><span><strong>周报</strong><small>工作汇报 + 技术总结</small></span>
+              </button>
+              <div id="saved-template-nav"></div>
+              <div class="legacy-drafts" id="legacy-template-drafts" hidden></div>
+              <button
+                class="template-nav-item template-create-entry"
+                id="custom-template-btn"
+                type="button"
+              >
+                <span class="template-nav-icon">+</span
+                ><span><strong>自定义</strong><small>创建或学习新的格式</small></span>
+              </button>
+            </nav>
+          </div>
+          <nav class="drawer-actions" aria-label="快捷操作">
+            <button class="drawer-action drawer-action-primary" id="new-btn" type="button">
+              <span class="drawer-action-icon">+</span
+              ><span><strong>开始新记录</strong><small>整理新的一周内容</small></span>
+            </button>
+            <button class="drawer-action" id="settings-btn" type="button">
+              <span class="drawer-action-icon">⚙</span
+              ><span><strong>设置</strong><small>调整周次和表达偏好</small></span>
+            </button>
+            <button class="drawer-action" id="help-btn" type="button">
+              <span class="drawer-action-icon">?</span
+              ><span><strong>使用帮助</strong><small>了解记录、历史和下载</small></span>
+            </button>
+          </nav>
+          <div class="history-section">
+            <div class="drawer-section-title">
+              <span>历史周次</span
+              ><button class="mini-btn" id="history-refresh" type="button">刷新</button>
+            </div>
+            <nav class="drawer-nav" id="history" aria-label="历史周次列表"></nav>
+          </div>
+        </section>
+
+        <section class="drawer-view" id="drawer-settings-view" hidden>
+          <p class="drawer-intro" id="settings-intro">这些设置会影响周次标题和 AI 整理方式。</p>
+          <form class="settings-form" id="settings-form">
+            <label class="field-label" for="week-one-input">第 1 周起始日期</label>
+            <input
+              class="field-input"
+              id="week-one-input"
+              name="week_one_start"
+              type="date"
+              required
+            />
+            <p class="field-note" id="week-one-note">每周按周一至周日计算。</p>
+
+            <label class="field-label" for="settings-detail-level">内容详略</label>
+            <select class="field-input" id="settings-detail-level" name="detail_level">
+              <option value="concise">精简</option>
+              <option value="standard">标准</option>
+              <option value="detailed">详细</option>
+            </select>
+            <label class="field-label" for="settings-tone">表达语气</label>
+            <select class="field-input" id="settings-tone" name="tone">
+              <option value="formal">正式专业</option>
+              <option value="natural">自然清晰</option>
+              <option value="direct">简洁直接</option>
+            </select>
+
+            <p class="settings-error" id="settings-error" role="alert" hidden></p>
+            <button class="text-btn settings-save" id="settings-save" type="submit">
+              保存设置
+            </button>
+          </form>
+        </section>
+
+        <section class="drawer-view help-view" id="drawer-help-view" hidden>
+          <div class="help-block">
+            <h3>怎么记录</h3>
+            <p>
+              直接输入本周做过的工作、学习、项目或比赛内容，可以分多次补充。信息足够后会整理成工作汇报和技术总结。
+            </p>
+          </div>
+          <div class="help-block">
+            <h3>添加附件</h3>
+            <p>
+              电脑端可把文件拖进页面，电脑和手机都可点击输入框左侧的“+”选择文档、表格、图片或
+              ZIP。单个文件最大 16MB，原文件不写入业务数据库；提取文字仅用于当前会话并最多暂存 6
+              小时。
+            </p>
+          </div>
+          <div class="help-block">
+            <h3>查看历史</h3>
+            <p>历史按周次倒序显示。点击某一周即可查看归档内容，当前周会用蓝色标记。</p>
+          </div>
+          <div class="help-block">
+            <h3>下载文档</h3>
+            <p>整理完成后，在结果卡片右上角点击“下载 Word”。</p>
+          </div>
+          <div class="help-block">
+            <h3>自定义模板</h3>
+            <p>
+              从侧边栏进入“自定义”，可以自己搭建格式，也可以上传 1–5 份同类样例让 AI
+              学习。样例原文件不保存，提取后的文字与结构最多暂存 6 小时。
+            </p>
+          </div>
+          <div class="help-block">
+            <h3>设置项</h3>
+            <p>第 1 周日期决定周次编号；详略和语气会作为所有模板的 AI 整理偏好。</p>
+          </div>
+          <div class="help-block">
+            <h3>隐私与数据</h3>
+            <p id="privacy-summary">
+              附件原文件不写入业务数据库；提取文字、未完成对话和模板草稿最多暂存 6
+              小时。文本整理使用 DeepSeek，语音识别使用火山引擎；正在加载数据保留期限……
+            </p>
+            <button class="text-btn danger-btn" id="delete-data-btn" type="button">
+              删除本浏览器的全部数据
+            </button>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <main class="stage">
+      <section class="hero" id="hero">
+        <h1 class="hero-title">这周你做了什么？</h1>
+        <p class="hero-sub">
+          和我聊聊这周的工作、学习与比赛，我会逐步补全信息，整理成周报和技术总结。
+        </p>
+        <div class="hero-facts" id="hero-facts">
+          <span id="hero-week-range">本周日期加载中</span>
+          <span id="hero-output-name">工作汇报 + 技术总结</span>
+        </div>
+      </section>
+
+      <div class="messages" id="messages" role="log" aria-label="对话记录"></div>
+      <div class="result" id="result" aria-live="polite" hidden></div>
+
+      <section
+        class="template-workspace"
+        id="template-workspace"
+        hidden
+        aria-label="自定义模板编辑器"
+      >
+        <header class="template-workspace-head">
+          <button class="mini-btn" id="template-workspace-back" type="button">返回</button>
+          <div>
+            <span class="eyebrow">自定义</span>
+            <h1 id="template-workspace-title">创建模板</h1>
+          </div>
+          <button class="text-btn" id="template-save-btn" type="button" hidden>保存模板</button>
+        </header>
+
+        <div class="template-start" id="template-start">
+          <p>选择一种方式开始，之后都可以手动编辑或继续让 AI 调整。</p>
+          <div class="template-methods">
+            <button class="template-method" id="template-manual-btn" type="button">
+              <span>✦</span><strong>自己定义格式</strong
+              ><small>添加章节、字段、列表和表格，实时查看预览</small>
+            </button>
+            <button class="template-method" id="template-learn-btn" type="button">
+              <span>AI</span><strong>上传样例学习</strong
+              ><small>上传 1–5 份同类文件，由 DeepSeek 提取共同结构</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="template-learn" id="template-learn" hidden>
+          <div class="learn-drop" id="template-learn-drop">
+            <strong>上传同类周报样例</strong>
+            <p>支持 DOCX、PDF、PPTX、XLSX、CSV、TXT、Markdown · 1–5 个文件</p>
+            <button class="text-btn" id="template-file-btn" type="button">选择文件</button>
+            <input
+              id="template-file-input"
+              type="file"
+              accept=".docx,.pdf,.pptx,.xlsx,.csv,.txt,.md,.markdown"
+              multiple
+              hidden
+            />
+          </div>
+          <div class="template-sample-list" id="template-sample-list"></div>
+          <p class="template-learn-result" id="template-learn-result" role="status"></p>
+          <div class="template-learn-actions">
+            <button class="mini-btn" id="template-learn-cancel" type="button">换一种方式</button
+            ><button class="text-btn" id="template-analyze-btn" type="button" disabled>
+              AI 分析格式
+            </button>
+          </div>
+        </div>
+
+        <div class="template-editor" id="template-editor" hidden>
+          <div class="template-mobile-tabs" role="tablist">
+            <button class="active" data-template-pane="edit" type="button">编辑</button
+            ><button data-template-pane="preview" type="button">预览</button>
+          </div>
+          <div class="template-editor-pane" id="template-editor-pane">
+            <div class="template-title-field">
+              <label for="template-title-pattern">文档标题</label
+              ><input id="template-title-pattern" maxlength="200" /><small
+                >可使用 {week_number}、{date_range}、{week_start}、{week_end}</small
+              >
+            </div>
+            <div id="template-sections-editor"></div>
+            <button class="mini-btn template-add-section" id="template-add-section" type="button">
+              + 添加章节
+            </button>
+            <section class="template-ai-panel">
+              <div>
+                <strong>让 AI 修改格式</strong
+                ><small>例如：把“风险”改成必填，并在最后增加三列表格</small>
+              </div>
+              <div class="template-ai-messages" id="template-ai-messages"></div>
+              <div class="template-ai-composer">
+                <textarea
+                  id="template-ai-input"
+                  rows="2"
+                  maxlength="4000"
+                  placeholder="描述你想怎样调整模板"
+                ></textarea
+                ><button id="template-ai-send" type="button">发送</button>
+              </div>
+            </section>
+          </div>
+          <aside class="template-preview-pane" id="template-preview-pane">
+            <div class="template-preview-label">实时预览</div>
+            <div class="template-paper" id="template-preview"></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <div class="input-dock">
+      <div class="composer-shell" id="composer-shell">
+        <div class="attachment-tray" id="attachment-tray" aria-label="待发送附件" hidden></div>
+
+        <div class="upload-menu" id="upload-menu" role="menu" aria-label="选择附件类型" hidden>
+          <div class="upload-menu-head">
+            <strong>添加附件</strong><span>单个文件最大 16MB</span>
+          </div>
+          <button
+            type="button"
+            role="menuitem"
+            data-upload-accept=".docx,.pptx,.pdf,.txt,.md,.markdown,.json,.yaml,.yml,.xml,.html,.log"
+          >
+            <span class="upload-kind upload-kind-doc" aria-hidden="true"
+              ><span class="attachment-glyph"></span></span
+            ><span><strong>文档与文本</strong><small>Word、PPT、PDF、Markdown、TXT</small></span>
+          </button>
+          <button type="button" role="menuitem" data-upload-accept=".csv,.tsv,.xlsx">
+            <span class="upload-kind upload-kind-data" aria-hidden="true"
+              ><span class="attachment-glyph"></span></span
+            ><span><strong>表格与数据</strong><small>CSV、TSV、Excel</small></span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            data-upload-accept="image/png,image/jpeg,image/webp,image/bmp,image/tiff"
+          >
+            <span class="upload-kind upload-kind-image" aria-hidden="true"
+              ><span class="attachment-glyph"></span></span
+            ><span><strong>图片与截图</strong><small>PNG、JPG、WebP，可识别文字</small></span>
+          </button>
+          <button type="button" role="menuitem" data-upload-accept=".zip,application/zip">
+            <span class="upload-kind upload-kind-zip" aria-hidden="true"
+              ><span class="attachment-glyph"></span></span
+            ><span><strong>压缩包</strong><small>读取目录及其中可识别的内容</small></span>
+          </button>
+        </div>
+
+        <div class="input-panel" id="input-panel">
+          <button
+            class="plus-btn composer-icon-btn"
+            id="plus-btn"
+            type="button"
+            aria-label="添加附件"
+            aria-haspopup="menu"
+            aria-expanded="false"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="21"
+              height="21"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+
+          <textarea
+            id="raw-input"
+            rows="1"
+            enterkeyhint="send"
+            aria-label="消息"
+            placeholder="输入本周内容，或添加附件"
+          ></textarea>
+
+          <div class="composer-actions">
+            <div class="mode-picker" id="mode-picker">
+              <button
+                class="mode-btn"
+                id="mode-btn"
+                type="button"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+              >
+                <span id="mode-label">高级</span>
+                <svg
+                  class="mode-arrow"
+                  viewBox="0 0 16 16"
+                  width="13"
+                  height="13"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m4 6 4 4 4-4" />
+                </svg>
+              </button>
+              <div class="mode-menu" id="mode-menu" role="listbox" aria-label="选择模式" hidden>
+                <button type="button" role="option" data-mode="normal">
+                  <strong>普通</strong><small>简洁快速</small>
+                </button>
+                <button type="button" role="option" data-mode="advanced" aria-selected="true">
+                  <strong>高级</strong><small>深入分析，输出更多</small>
+                </button>
+              </div>
+            </div>
+
+            <button
+              class="mic-btn composer-icon-btn"
+              id="mic-btn"
+              type="button"
+              aria-label="麦克风输入"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="17"
+                height="17"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="9" y="3" width="6" height="11" rx="3" />
+                <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+              </svg>
+            </button>
+
+            <div class="primary-action-slot">
+              <button class="send-btn" id="send-btn" type="button" aria-label="发送" disabled>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="19"
+                  height="19"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="rec-bar" id="rec-bar">
+            <div class="rec-text" id="rec-text" aria-live="polite"></div>
+            <div class="rec-footer">
+              <button class="rec-plus" id="rec-plus" type="button" aria-label="添加附件">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="21"
+                  height="21"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </button>
+              <div class="rec-wave" id="rec-wave" aria-hidden="true"></div>
+              <div class="rec-meta">
+                <span class="rec-timer" id="rec-timer">00:00</span
+                ><span class="rec-status" id="rec-status">正在录音</span>
+              </div>
+              <div class="rec-actions">
+                <button
+                  class="rec-icon rec-pause"
+                  id="rec-pause"
+                  type="button"
+                  aria-label="暂停录音"
+                >
+                  <svg
+                    class="pause-icon"
+                    viewBox="0 0 24 24"
+                    width="17"
+                    height="17"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <rect x="7" y="6" width="4" height="12" rx="1" />
+                    <rect x="13" y="6" width="4" height="12" rx="1" />
+                  </svg>
+                  <svg
+                    class="resume-icon"
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="m9 6 9 6-9 6z" />
+                  </svg>
+                </button>
+                <button
+                  class="rec-icon rec-confirm"
+                  id="rec-done"
+                  type="button"
+                  aria-label="发送语音"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="19"
+                    height="19"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 19V5M5 12l7-7 7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <input id="file-input" type="file" multiple hidden />
+      <div class="upload-status" id="upload-status" role="status" aria-live="polite"></div>
+      <p class="input-hint">AI 可能会出错，请核查重要信息</p>
+    </div>
+
+    <button
+      class="upload-menu-backdrop"
+      id="upload-menu-backdrop"
+      type="button"
+      aria-label="关闭附件菜单"
+      hidden
+    ></button>
+    <div class="drop-overlay" id="drop-overlay" hidden aria-hidden="true">
+      <div>
+        <span>+</span><strong>拖到这里添加附件</strong
+        ><small>支持文档、表格、图片和 ZIP · 单个最大 16MB</small>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+
+    <dialog class="template-name-dialog" id="template-name-dialog">
+      <form method="dialog" id="template-name-form">
+        <h2>保存自定义模板</h2>
+        <p>保存后会出现在“周报”和“自定义”之间。</p>
+        <label for="template-name-input">模板名称</label>
+        <input
+          id="template-name-input"
+          maxlength="30"
+          autocomplete="off"
+          placeholder="例如：科研项目周报"
+          required
+        />
+        <p class="settings-error" id="template-name-error" hidden></p>
+        <div class="dialog-actions">
+          <button class="mini-btn" value="cancel" type="button" id="template-name-cancel">
+            取消</button
+          ><button class="text-btn" value="save" type="submit">确认保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="quota-dialog-backdrop" id="quota-dialog-backdrop" hidden>
+      <section
+        class="quota-dialog"
+        id="quota-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quota-dialog-title"
+        aria-describedby="quota-dialog-description"
+        tabindex="-1"
+      >
+        <div class="quota-dialog-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="26"
+            height="26"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v6M12 17h.01" />
+          </svg>
+        </div>
+        <h2 id="quota-dialog-title">今日消息次数已用完</h2>
+        <p id="quota-dialog-description">每天最多可发送 10 条消息，请明天再来。</p>
+        <button class="quota-dialog-close" id="quota-dialog-close" type="button">知道了</button>
+      </section>
+    </div>
+
+    <script src="static/app.js?v=0.1.0"></script>
+  </body>
+</html>
