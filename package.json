@@ -8,7 +8,7 @@
     "format:check": "prettier --check \"backend/static/**/*.{html,css,js}\" \".github/**/*.{yml,yaml}\""
   },
   "devDependencies": {
-    "prettier": "3.9.6"
+    "prettier": "3.9.9"
   },
   "engines": {
     "node": ">=24"
